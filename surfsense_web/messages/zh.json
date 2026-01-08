@@ -149,6 +149,23 @@
 		"connectors": "连接器",
 		"add_connector": "添加连接器",
 		"manage_connectors": "管理连接器",
+		"podcasts": "播客",
+		"podcast": {
+			"generating": "正在生成播客... 这可能需要几分钟",
+			"failed": "生成播客失败",
+			"loadingAudio": "正在加载音频...",
+			"alreadyInProgress": "播客正在生成中",
+			"pleaseWait": "请等待当前播客生成完成。",
+			"defaultTitle": "SurfSense AI 生成的播客",
+			"viewTranscript": "查看文字稿（{count} 条）",
+			"speaker": "发言人 {id}",
+			"error": "错误",
+			"unknownError": "未知错误",
+			"missingTaskId": "缺少任务 ID 或播客 ID",
+			"cancelled": "播客生成已取消",
+			"dialogueEntries": "{count} 条对话",
+			"loadAudioFailed": "加载音频失败"
+		},
 		"logs": "日志",
 		"all_search_spaces": "所有搜索空间",
 		"team": "团队"

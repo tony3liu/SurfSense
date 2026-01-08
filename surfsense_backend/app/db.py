@@ -435,6 +435,12 @@ class Podcast(BaseModel, TimestampMixin):
     podcast_transcript = Column(JSONB, nullable=True)  # List of transcript entries
     file_location = Column(Text, nullable=True)  # Path to the audio file
 
+    # TTS configuration fields
+    tts_provider = Column(String(100), nullable=True)  # TTS provider (e.g., "openai/tts-1")
+    tts_voices = Column(JSONB, nullable=True)  # Voice mapping {0: "alloy", 1: "echo"}
+    source_type = Column(String(50), nullable=True)  # "document" | "text" | "chat"
+    duration_seconds = Column(Integer, nullable=True)  # Podcast duration in seconds
+
     search_space_id = Column(
         Integer, ForeignKey("searchspaces.id", ondelete="CASCADE"), nullable=False
     )

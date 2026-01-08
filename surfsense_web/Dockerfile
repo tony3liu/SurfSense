@@ -67,6 +67,14 @@ COPY --from=builder /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
+# Copy messages folder for next-intl runtime localization
+COPY --from=builder --chown=nextjs:nodejs /app/messages ./messages
+
+# Set runtime environment variables for backend URL
+ENV NEXT_PUBLIC_FASTAPI_BACKEND_URL=http://backend:8000
+ENV NEXT_PUBLIC_FASTAPI_BACKEND_AUTH_TYPE=LOCAL
+ENV NEXT_PUBLIC_ETL_SERVICE=DOCLING
+
 USER nextjs
 
 EXPOSE 3000

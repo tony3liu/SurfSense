@@ -100,7 +100,7 @@ async def create_merged_podcast_audio(
 ) -> dict[str, Any]:
     """Generate audio for each transcript and merge them into a single podcast file."""
 
-    # configuration = Configuration.from_runnable_config(config)
+    configuration = Configuration.from_runnable_config(config)
 
     starting_transcript = PodcastTranscriptEntry(
         speaker_id=1, dialog="Welcome to Surfsense Podcast."
@@ -138,11 +138,17 @@ async def create_merged_podcast_audio(
             speaker_id = segment.get("speaker_id", 0)
             dialog = segment.get("dialog", "")
 
-        # Select voice based on speaker_id
-        voice = get_voice_for_provider(app_config.TTS_SERVICE, speaker_id)
+        # Determine TTS provider (custom or default)
+        tts_provider = configuration.tts_provider or app_config.TTS_SERVICE
+
+        # Select voice based on speaker_id (custom or default)
+        if configuration.custom_voices and speaker_id in configuration.custom_voices:
+            voice = configuration.custom_voices[speaker_id]
+        else:
+            voice = get_voice_for_provider(tts_provider, speaker_id)
 
         # Generate a unique filename for this segment
-        if app_config.TTS_SERVICE == "local/kokoro":
+        if tts_provider == "local/kokoro":
             # Kokoro generates WAV files
             filename = f"{temp_dir}/{session_id}_{index}.wav"
         else:
@@ -150,7 +156,7 @@ async def create_merged_podcast_audio(
             filename = f"{temp_dir}/{session_id}_{index}.mp3"
 
         try:
-            if app_config.TTS_SERVICE == "local/kokoro":
+            if tts_provider == "local/kokoro":
                 # Use Kokoro TTS service
                 kokoro_service = await get_kokoro_tts_service(
                     lang_code="a"
@@ -162,7 +168,7 @@ async def create_merged_podcast_audio(
             else:
                 if app_config.TTS_SERVICE_API_BASE:
                     response = await aspeech(
-                        model=app_config.TTS_SERVICE,
+                        model=tts_provider,
                         api_base=app_config.TTS_SERVICE_API_BASE,
                         api_key=app_config.TTS_SERVICE_API_KEY,
                         voice=voice,
@@ -172,7 +178,7 @@ async def create_merged_podcast_audio(
                     )
                 else:
                     response = await aspeech(
-                        model=app_config.TTS_SERVICE,
+                        model=tts_provider,
                         api_key=app_config.TTS_SERVICE_API_KEY,
                         voice=voice,
                         input=dialog,

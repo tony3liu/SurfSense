@@ -78,18 +78,17 @@ class BaseApiService {
 				},
 			};
 
-			// Validate the base URL
-			if (!this.baseUrl) {
-				throw new AppError("Base URL is not set.");
-			}
-
 			// Validate the bearer token
 			if (!this.bearerToken && !this.noAuthEndpoints.includes(url)) {
 				throw new AuthenticationError("You are not authenticated. Please login again.");
 			}
 
-			// Construct the full URL
-			const fullUrl = new URL(url, this.baseUrl).toString();
+		// Construct the full URL
+		// If baseUrl is empty or not set, use the url as-is (for relative URLs)
+		// Otherwise, construct absolute URL from base + path
+		const fullUrl = this.baseUrl
+			? new URL(url, this.baseUrl).toString()
+			: url;
 
 			// Prepare fetch options
 			const fetchOptions: RequestInit = {

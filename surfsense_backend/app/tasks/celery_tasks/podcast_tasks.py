@@ -67,6 +67,9 @@ def generate_content_podcast_task(
     search_space_id: int,
     podcast_title: str = "SurfSense Podcast",
     user_prompt: str | None = None,
+    tts_provider: str | None = None,
+    custom_voices: dict | None = None,
+    source_type: str = "chat",
 ) -> dict:
     """
     Celery task to generate podcast from source content (for new-chat).
@@ -78,6 +81,9 @@ def generate_content_podcast_task(
         search_space_id: ID of the search space
         podcast_title: Title for the podcast
         user_prompt: Optional instructions for podcast style/tone
+        tts_provider: TTS provider to use (e.g., "openai/tts-1")
+        custom_voices: Custom voice mapping {0: "alloy", 1: "echo"}
+        source_type: Source of the content ("document" | "text" | "chat")
 
     Returns:
         dict with podcast_id on success, or error info on failure
@@ -92,6 +98,9 @@ def generate_content_podcast_task(
                 search_space_id,
                 podcast_title,
                 user_prompt,
+                tts_provider,
+                custom_voices,
+                source_type,
             )
         )
         loop.run_until_complete(loop.shutdown_asyncgens())
@@ -111,6 +120,9 @@ async def _generate_content_podcast(
     search_space_id: int,
     podcast_title: str = "SurfSense Podcast",
     user_prompt: str | None = None,
+    tts_provider: str | None = None,
+    custom_voices: dict | None = None,
+    source_type: str = "chat",
 ) -> dict:
     """Generate content-based podcast with new session."""
     async with get_celery_session_maker()() as session:
@@ -121,6 +133,8 @@ async def _generate_content_podcast(
                     "podcast_title": podcast_title,
                     "search_space_id": search_space_id,
                     "user_prompt": user_prompt,
+                    "tts_provider": tts_provider,
+                    "custom_voices": custom_voices,
                 }
             }
 
@@ -158,6 +172,9 @@ async def _generate_content_podcast(
                 podcast_transcript=serializable_transcript,
                 file_location=file_path,
                 search_space_id=search_space_id,
+                tts_provider=tts_provider,
+                tts_voices=custom_voices,
+                source_type=source_type,
             )
             session.add(podcast)
             await session.commit()

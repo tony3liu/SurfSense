@@ -2,6 +2,7 @@
 
 import { makeAssistantToolUI } from "@assistant-ui/react";
 import { AlertCircleIcon, Loader2Icon, MicIcon } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { z } from "zod";
 import { Audio } from "@/components/tool-ui/audio";
@@ -84,6 +85,7 @@ function parsePodcastDetails(data: unknown): { podcast_transcript?: PodcastTrans
  * Loading state component shown while podcast is being generated
  */
 function PodcastGeneratingState({ title }: { title: string }) {
+	const t = useTranslations("common.podcast");
 	return (
 		<div className="my-4 overflow-hidden rounded-xl border border-primary/20 bg-gradient-to-br from-primary/5 to-primary/10 p-6">
 			<div className="flex items-center gap-4">
@@ -98,7 +100,7 @@ function PodcastGeneratingState({ title }: { title: string }) {
 					<h3 className="font-semibold text-foreground text-lg">{title}</h3>
 					<div className="mt-2 flex items-center gap-2 text-muted-foreground">
 						<Loader2Icon className="size-4 animate-spin" />
-						<span className="text-sm">Generating podcast... This may take a few minutes</span>
+						<span className="text-sm">{t("generating")}</span>
 					</div>
 					<div className="mt-3">
 						<div className="h-1.5 w-full overflow-hidden rounded-full bg-primary/10">
@@ -115,6 +117,7 @@ function PodcastGeneratingState({ title }: { title: string }) {
  * Error state component shown when podcast generation fails
  */
 function PodcastErrorState({ title, error }: { title: string; error: string }) {
+	const t = useTranslations("common.podcast");
 	return (
 		<div className="my-4 overflow-hidden rounded-xl border border-destructive/20 bg-destructive/5 p-6">
 			<div className="flex items-center gap-4">
@@ -123,7 +126,7 @@ function PodcastErrorState({ title, error }: { title: string; error: string }) {
 				</div>
 				<div className="flex-1">
 					<h3 className="font-semibold text-foreground">{title}</h3>
-					<p className="mt-1 text-destructive text-sm">Failed to generate podcast</p>
+					<p className="mt-1 text-destructive text-sm">{t("failed")}</p>
 					<p className="mt-2 text-muted-foreground text-sm">{error}</p>
 				</div>
 			</div>
@@ -135,6 +138,7 @@ function PodcastErrorState({ title, error }: { title: string; error: string }) {
  * Audio loading state component
  */
 function AudioLoadingState({ title }: { title: string }) {
+	const t = useTranslations("common.podcast");
 	return (
 		<div className="my-4 overflow-hidden rounded-xl border bg-muted/30 p-6">
 			<div className="flex items-center gap-4">
@@ -145,7 +149,7 @@ function AudioLoadingState({ title }: { title: string }) {
 					<h3 className="font-semibold text-foreground">{title}</h3>
 					<div className="mt-2 flex items-center gap-2 text-muted-foreground">
 						<Loader2Icon className="size-4 animate-spin" />
-						<span className="text-sm">Loading audio...</span>
+						<span className="text-sm">{t("loadingAudio")}</span>
 					</div>
 				</div>
 			</div>
@@ -155,18 +159,24 @@ function AudioLoadingState({ title }: { title: string }) {
 
 /**
  * Podcast Player Component - Fetches audio and transcript with authentication
+ * Exported for use in standalone podcast pages
  */
-function PodcastPlayer({
+export function PodcastPlayer({
 	podcastId,
 	title,
 	description,
 	durationMs,
 }: {
 	podcastId: number;
-	title: string;
-	description: string;
+	title?: string;
+	description?: string;
 	durationMs?: number;
 }) {
+	const t = useTranslations("common.podcast");
+
+	// Set default values if not provided
+	const podcastTitle = title || t("defaultTitle").replace("AI-", "");
+	const podcastDescription = description || t("defaultTitle");
 	const [audioSrc, setAudioSrc] = useState<string | null>(null);
 	const [transcript, setTranscript] = useState<PodcastTranscriptEntry[] | null>(null);
 	const [isLoading, setIsLoading] = useState(true);
@@ -244,11 +254,11 @@ function PodcastPlayer({
 	}, [loadPodcast]);
 
 	if (isLoading) {
-		return <AudioLoadingState title={title} />;
+		return <AudioLoadingState title={podcastTitle} />;
 	}
 
 	if (error || !audioSrc) {
-		return <PodcastErrorState title={title} error={error || "Failed to load audio"} />;
+		return <PodcastErrorState title={podcastTitle} error={error || t("loadAudioFailed")} />;
 	}
 
 	return (
@@ -256,8 +266,8 @@ function PodcastPlayer({
 			<Audio
 				id={`podcast-${podcastId}`}
 				src={audioSrc}
-				title={title}
-				description={description}
+				title={podcastTitle}
+				description={podcastDescription}
 				durationMs={durationMs}
 				className="w-full"
 			/>
@@ -265,12 +275,12 @@ function PodcastPlayer({
 			{transcript && transcript.length > 0 && (
 				<details className="mt-3 rounded-lg border bg-muted/30 p-3">
 					<summary className="cursor-pointer font-medium text-muted-foreground text-sm hover:text-foreground">
-						View transcript ({transcript.length} entries)
+						{t("viewTranscript", { count: transcript.length })}
 					</summary>
 					<div className="mt-3 space-y-3 max-h-96 overflow-y-auto">
 						{transcript.map((entry, idx) => (
 							<div key={`${idx}-${entry.speaker_id}`} className="text-sm">
-								<span className="font-medium text-primary">Speaker {entry.speaker_id + 1}:</span>{" "}
+								<span className="font-medium text-primary">{t("speaker", { id: entry.speaker_id + 1 })}:</span>{" "}
 								<span className="text-muted-foreground">{entry.dialog}</span>
 							</div>
 						))}
@@ -285,6 +295,7 @@ function PodcastPlayer({
  * Polling component that checks task status and shows player when complete
  */
 function PodcastTaskPoller({ taskId, title }: { taskId: string; title: string }) {
+	const t = useTranslations("common.podcast");
 	const [taskStatus, setTaskStatus] = useState<TaskStatusResponse>({ status: "processing" });
 	const pollingRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -344,7 +355,7 @@ function PodcastTaskPoller({ taskId, title }: { taskId: string; title: string })
 
 	// Show error state
 	if (taskStatus.status === "error") {
-		return <PodcastErrorState title={title} error={taskStatus.error || "Generation failed"} />;
+		return <PodcastErrorState title={title} error={taskStatus.error || t("failed")} />;
 	}
 
 	// Show player when complete
@@ -355,15 +366,15 @@ function PodcastTaskPoller({ taskId, title }: { taskId: string; title: string })
 				title={taskStatus.title || title}
 				description={
 					taskStatus.transcript_entries
-						? `${taskStatus.transcript_entries} dialogue entries`
-						: "SurfSense AI-generated podcast"
+						? t("dialogueEntries", { count: taskStatus.transcript_entries })
+						: t("defaultTitle")
 				}
 			/>
 		);
 	}
 
 	// Fallback
-	return <PodcastErrorState title={title} error="Unexpected state" />;
+	return <PodcastErrorState title={title} error={t("unknownError")} />;
 }
 
 /**
@@ -380,7 +391,8 @@ export const GeneratePodcastToolUI = makeAssistantToolUI<
 >({
 	toolName: "generate_podcast",
 	render: function GeneratePodcastUI({ args, result, status }) {
-		const title = args.podcast_title || "SurfSense Podcast";
+		const t = useTranslations("common.podcast");
+		const title = args.podcast_title || t("defaultTitle").replace("AI-", "");
 
 		// Loading state - tool is still running (agent processing)
 		if (status.type === "running" || status.type === "requires-action") {
@@ -394,7 +406,7 @@ export const GeneratePodcastToolUI = makeAssistantToolUI<
 					<div className="my-4 rounded-xl border border-muted p-4 text-muted-foreground">
 						<p className="flex items-center gap-2">
 							<MicIcon className="size-4" />
-							<span className="line-through">Podcast generation cancelled</span>
+							<span className="line-through">{t("cancelled")}</span>
 						</p>
 					</div>
 				);
@@ -403,7 +415,7 @@ export const GeneratePodcastToolUI = makeAssistantToolUI<
 				return (
 					<PodcastErrorState
 						title={title}
-						error={typeof status.error === "string" ? status.error : "An error occurred"}
+						error={typeof status.error === "string" ? status.error : t("error")}
 					/>
 				);
 			}
@@ -416,7 +428,7 @@ export const GeneratePodcastToolUI = makeAssistantToolUI<
 
 		// Error result
 		if (result.status === "error") {
-			return <PodcastErrorState title={title} error={result.error || "Unknown error"} />;
+			return <PodcastErrorState title={title} error={result.error || t("unknownError")} />;
 		}
 
 		// Already generating - show simple warning, don't create another poller
@@ -430,10 +442,10 @@ export const GeneratePodcastToolUI = makeAssistantToolUI<
 						</div>
 						<div>
 							<p className="text-amber-600 dark:text-amber-400 text-sm font-medium">
-								Podcast already in progress
+								{t("alreadyInProgress")}
 							</p>
 							<p className="text-muted-foreground text-xs mt-0.5">
-								Please wait for the current podcast to complete.
+								{t("pleaseWait")}
 							</p>
 						</div>
 					</div>
@@ -454,14 +466,14 @@ export const GeneratePodcastToolUI = makeAssistantToolUI<
 					title={result.title || title}
 					description={
 						result.transcript_entries
-							? `${result.transcript_entries} dialogue entries`
-							: "SurfSense AI-generated podcast"
+							? t("dialogueEntries", { count: result.transcript_entries })
+							: t("defaultTitle")
 					}
 				/>
 			);
 		}
 
 		// Fallback - missing required data
-		return <PodcastErrorState title={title} error="Missing task ID or podcast ID" />;
+		return <PodcastErrorState title={title} error={t("missingTaskId")} />;
 	},
 });

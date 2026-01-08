@@ -35,7 +35,29 @@ const nextConfig: NextConfig = {
 	// PostHog reverse proxy configuration
 	// This helps bypass ad blockers by routing requests through your domain
 	async rewrites() {
+		// For Docker: Next.js server proxies to backend using container name
+		// Browser makes direct requests to localhost:8000
+		const backendInternalUrl = "http://backend:8000";
+		
 		return [
+			// Backend API proxy - Next.js server proxies these to backend
+			{
+				source: "/auth/:path*",
+				destination: `${backendInternalUrl}/auth/:path*`,
+			},
+			{
+				source: "/users/:path*",
+				destination: `${backendInternalUrl}/users/:path*`,
+			},
+			{
+				source: "/api/:path*", 
+				destination: `${backendInternalUrl}/api/:path*`,
+			},
+			{
+				source: "/verify-token",
+				destination: `${backendInternalUrl}/verify-token`,
+			},
+			// PostHog reverse proxy
 			{
 				source: "/ingest/static/:path*",
 				destination: "https://us-assets.i.posthog.com/static/:path*",

@@ -88,7 +88,7 @@ class CustomBearerTransport(BearerTransport):
             return JSONResponse(bearer_response.model_dump())
 
 
-bearer_transport = CustomBearerTransport(tokenUrl="auth/jwt/login")
+bearer_transport = CustomBearerTransport(tokenUrl="http://localhost:8000/auth/jwt/login")
 
 
 auth_backend = AuthenticationBackend(

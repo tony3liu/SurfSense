@@ -14,6 +14,12 @@ class PodcastBase(BaseModel):
     file_location: str | None = None
     search_space_id: int
 
+    # TTS configuration fields
+    tts_provider: str | None = None
+    tts_voices: dict | None = None
+    source_type: str | None = None
+    duration_seconds: int | None = None
+
 
 class PodcastCreate(PodcastBase):
     """Schema for creating a podcast."""

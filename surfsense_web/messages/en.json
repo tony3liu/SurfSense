@@ -149,6 +149,23 @@
 		"connectors": "Connectors",
 		"add_connector": "Add Connector",
 		"manage_connectors": "Manage Connectors",
+		"podcasts": "Podcasts",
+		"podcast": {
+			"generating": "Generating podcast... This may take a few minutes",
+			"failed": "Failed to generate podcast",
+			"loadingAudio": "Loading audio...",
+			"alreadyInProgress": "Podcast already in progress",
+			"pleaseWait": "Please wait for the current podcast to complete.",
+			"defaultTitle": "SurfSense AI-generated podcast",
+			"viewTranscript": "View transcript ({count} entries)",
+			"speaker": "Speaker {id}",
+			"error": "Error",
+			"unknownError": "Unknown error",
+			"missingTaskId": "Missing task ID or podcast ID",
+			"cancelled": "Podcast generation cancelled",
+			"dialogueEntries": "{count} dialogue entries",
+			"loadAudioFailed": "Failed to load audio"
+		},
 		"logs": "Logs",
 		"all_search_spaces": "All Search Spaces",
 		"team": "Team"

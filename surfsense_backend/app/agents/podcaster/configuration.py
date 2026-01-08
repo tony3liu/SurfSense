@@ -19,6 +19,10 @@ class Configuration:
     search_space_id: int
     user_prompt: str | None = None
 
+    # TTS configuration
+    tts_provider: str | None = None  # Override global TTS_SERVICE (e.g., "openai/tts-1")
+    custom_voices: dict[int, str] | None = None  # Custom voice mapping {0: "alloy", 1: "echo"}
+
     @classmethod
     def from_runnable_config(
         cls, config: RunnableConfig | None = None

@@ -40,6 +40,12 @@ export default function DashboardLayout({
 			items: [],
 		},
 		{
+			title: "Podcasts",
+			url: `/dashboard/${search_space_id}/podcasts`,
+			icon: "Mic2",
+			items: [],
+		},
+		{
 			title: "Logs",
 			url: `/dashboard/${search_space_id}/logs`,
 			icon: "Logs",

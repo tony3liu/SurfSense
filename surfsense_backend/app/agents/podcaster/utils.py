@@ -82,3 +82,64 @@ def get_voice_for_provider(provider: str, speaker_id: int) -> dict | str:
             1: {},
         }
         return default_voices.get(speaker_id, default_voices[0])
+
+
+def get_available_voices(provider: str) -> list[dict]:
+    """
+    Get a list of available voices for the specified TTS provider.
+
+    Args:
+        provider: The TTS provider (e.g., "openai/tts-1", "vertex_ai/test", "local/kokoro")
+
+    Returns:
+        List of voice dictionaries with structure: [{"id": str, "name": str, "description": str}, ...]
+    """
+    if provider == "local/kokoro":
+        # Kokoro voices from https://huggingface.co/hexgrad/Kokoro-82M/tree/main/voices
+        return [
+            {"id": "am_adam", "name": "Adam (Male)", "description": "American English male voice"},
+            {"id": "af_bella", "name": "Bella (Female)", "description": "American English female voice"},
+            {"id": "af_heart", "name": "Heart (Female)", "description": "American English female voice (warm)"},
+            {"id": "af_sarah", "name": "Sarah (Female)", "description": "American English female voice"},
+            {"id": "am_michael", "name": "Michael (Male)", "description": "American English male voice"},
+            {"id": "bf_emma", "name": "Emma (Female)", "description": "British English female voice"},
+            {"id": "bm_george", "name": "George (Male)", "description": "British English male voice"},
+        ]
+
+    # Extract provider type from the model string
+    provider_type = provider.split("/")[0].lower() if "/" in provider else provider.lower()
+
+    if provider_type == "openai":
+        return [
+            {"id": "alloy", "name": "Alloy", "description": "Neutral, balanced voice"},
+            {"id": "echo", "name": "Echo", "description": "Male, clear voice"},
+            {"id": "fable", "name": "Fable", "description": "British, expressive voice"},
+            {"id": "onyx", "name": "Onyx", "description": "Deep, authoritative voice"},
+            {"id": "nova", "name": "Nova", "description": "Female, energetic voice"},
+            {"id": "shimmer", "name": "Shimmer", "description": "Female, soft voice"},
+        ]
+
+    elif provider_type == "vertex_ai":
+        return [
+            {"id": "en-US-Studio-O", "name": "US Studio O", "description": "US English neutral voice"},
+            {"id": "en-US-Studio-M", "name": "US Studio M", "description": "US English male voice"},
+            {"id": "en-UK-Studio-A", "name": "UK Studio A", "description": "UK English voice A"},
+            {"id": "en-UK-Studio-B", "name": "UK Studio B", "description": "UK English voice B"},
+            {"id": "en-AU-Studio-A", "name": "AU Studio A", "description": "Australian English voice A"},
+            {"id": "en-AU-Studio-B", "name": "AU Studio B", "description": "Australian English voice B"},
+        ]
+
+    elif provider_type == "azure":
+        # Azure uses OpenAI-compatible voices
+        return [
+            {"id": "alloy", "name": "Alloy", "description": "Neutral, balanced voice"},
+            {"id": "echo", "name": "Echo", "description": "Male, clear voice"},
+            {"id": "fable", "name": "Fable", "description": "British, expressive voice"},
+            {"id": "onyx", "name": "Onyx", "description": "Deep, authoritative voice"},
+            {"id": "nova", "name": "Nova", "description": "Female, energetic voice"},
+            {"id": "shimmer", "name": "Shimmer", "description": "Female, soft voice"},
+        ]
+
+    else:
+        # Default empty list for unknown providers
+        return []

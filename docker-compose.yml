@@ -115,13 +115,22 @@ services:
       context: ./surfsense_web
       # image: ghcr.io/modsetter/surfsense_ui:latest
       args:
-        NEXT_PUBLIC_FASTAPI_BACKEND_URL: ${NEXT_PUBLIC_FASTAPI_BACKEND_URL:-http://localhost:8000}
+        # Use empty string to make frontend use relative URLs (/api/v1/...)
+        # The Next.js proxy will forward these to the backend
+        NEXT_PUBLIC_FASTAPI_BACKEND_URL: ""
         NEXT_PUBLIC_FASTAPI_BACKEND_AUTH_TYPE: ${NEXT_PUBLIC_FASTAPI_BACKEND_AUTH_TYPE:-LOCAL}
         NEXT_PUBLIC_ETL_SERVICE: ${NEXT_PUBLIC_ETL_SERVICE:-DOCLING}
     ports:
       - "${FRONTEND_PORT:-3000}:3000"
     env_file:
       - ./surfsense_web/.env
+    environment:
+      # BACKEND_URL is used by Next.js server for proxying to backend
+      # In Docker: use container name for internal communication
+      - BACKEND_URL=http://backend:8000
+      # Use direct backend URL for browser access
+      - NEXT_PUBLIC_FASTAPI_BACKEND_URL=http://localhost:8000
+      # For development outside Docker, override to http://localhost:8000
     depends_on:
       - backend
 
