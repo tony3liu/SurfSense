@@ -5,6 +5,7 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { Upload } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useState, useCallback } from "react";
 import { useDropzone } from "react-dropzone";
 
@@ -25,6 +26,8 @@ export function ContentInputPanel({
 	documentFile,
 	onDocumentFileChange,
 }: ContentInputPanelProps) {
+	const t = useTranslations("nav_menu.podcast");
+
 	const [wordCount, setWordCount] = useState(0);
 
 	const handleTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -60,8 +63,8 @@ export function ContentInputPanel({
 	return (
 		<Card>
 			<CardHeader>
-				<CardTitle>Content Source</CardTitle>
-				<CardDescription>Provide the content you want to convert into a podcast</CardDescription>
+				<CardTitle>{t("content_source")}</CardTitle>
+				<CardDescription>{t("content_source_desc")}</CardDescription>
 			</CardHeader>
 			<CardContent>
 				<Tabs
@@ -69,25 +72,25 @@ export function ContentInputPanel({
 					onValueChange={(value) => onSourceTypeChange(value as "text" | "document")}
 				>
 					<TabsList className="grid w-full grid-cols-2">
-						<TabsTrigger value="text">Text Input</TabsTrigger>
-						<TabsTrigger value="document">Upload Document</TabsTrigger>
+						<TabsTrigger value="text">{t("text_input")}</TabsTrigger>
+						<TabsTrigger value="document">{t("upload_document")}</TabsTrigger>
 					</TabsList>
 
 					{/* Text Input Tab */}
 					<TabsContent value="text" className="space-y-4">
 						<div className="space-y-2">
-							<Label htmlFor="text-content">Paste or type your content</Label>
+							<Label htmlFor="text-content">{t("paste_content")}</Label>
 							<Textarea
 								id="text-content"
-								placeholder="Enter the text content you want to convert into a podcast. The more detailed your content, the better the podcast will be..."
+								placeholder={t("paste_placeholder")}
 								value={textContent}
 								onChange={handleTextChange}
 								rows={12}
 								className="resize-none"
 							/>
 							<div className="flex justify-between text-sm text-muted-foreground">
-								<span>Words: {wordCount}</span>
-								<span>Recommended: 500-2000 words for a 5-10 minute podcast</span>
+								<span>{t("word_count", { count: wordCount })}</span>
+								<span>{t("recommended_words")}</span>
 							</div>
 						</div>
 					</TabsContent>
@@ -95,7 +98,7 @@ export function ContentInputPanel({
 					{/* Document Upload Tab */}
 					<TabsContent value="document" className="space-y-4">
 						<div className="space-y-2">
-							<Label>Upload Document</Label>
+							<Label>{t("upload_document")}</Label>
 							<div
 								{...getRootProps()}
 								className={`
@@ -110,17 +113,17 @@ export function ContentInputPanel({
 										<>
 											<p className="text-sm font-medium">{documentFile.name}</p>
 											<p className="text-xs text-muted-foreground">
-												{(documentFile.size / 1024).toFixed(2)} KB
+												{t("file_size", { size: (documentFile.size / 1024).toFixed(2) })}
 											</p>
-											<p className="text-xs text-primary">Click or drag to replace</p>
+											<p className="text-xs text-primary">{t("click_to_replace")}</p>
 										</>
 									) : (
 										<>
 											<p className="text-sm">
-												{isDragActive ? "Drop the file here" : "Drag & drop a file here, or click to select"}
+												{isDragActive ? t("drop_file") : t("drop_file")}
 											</p>
 											<p className="text-xs text-muted-foreground">
-												Supported: PDF, DOCX, DOC, TXT, MD
+												{t("supported_formats")}
 											</p>
 										</>
 									)}

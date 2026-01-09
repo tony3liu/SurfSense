@@ -11,6 +11,7 @@ import {
 	SelectValue,
 } from "@/components/ui/select";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { Loader2 } from "lucide-react";
 
@@ -38,6 +39,8 @@ export function TTSConfigPanel({
 	speaker1Voice,
 	onSpeaker1VoiceChange,
 }: TTSConfigPanelProps) {
+	const t = useTranslations("nav_menu.podcast");
+
 	const [voices, setVoices] = useState<TTSVoice[]>([]);
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState<string | null>(null);
@@ -69,7 +72,7 @@ export function TTSConfigPanel({
 				}
 			} catch (err) {
 				console.error("Failed to load TTS voices:", err);
-				setError("Failed to load voices");
+				setError(t("load_voices_failed"));
 			} finally {
 				setLoading(false);
 			}
@@ -81,18 +84,18 @@ export function TTSConfigPanel({
 	return (
 		<Card>
 			<CardHeader>
-				<CardTitle>TTS Configuration</CardTitle>
+				<CardTitle>{t("tts_config")}</CardTitle>
 				<CardDescription>
-					Choose the text-to-speech provider and voices for your podcast hosts
+					{t("tts_config_desc")}
 				</CardDescription>
 			</CardHeader>
 			<CardContent className="space-y-4">
 				{/* TTS Provider Selection */}
 				<div className="space-y-2">
-					<Label htmlFor="tts-provider">TTS Provider</Label>
+					<Label htmlFor="tts-provider">{t("tts_provider")}</Label>
 					<Select value={ttsProvider} onValueChange={onTTSProviderChange}>
 						<SelectTrigger id="tts-provider">
-							<SelectValue placeholder="Select TTS provider" />
+							<SelectValue placeholder={t("select_provider")} />
 						</SelectTrigger>
 						<SelectContent>
 							{TTS_PROVIDERS.map((provider) => (
@@ -108,7 +111,7 @@ export function TTSConfigPanel({
 				{loading && (
 					<div className="flex items-center gap-2 text-sm text-muted-foreground">
 						<Loader2 className="h-4 w-4 animate-spin" />
-						Loading voices...
+						{t("loading_voices")}
 					</div>
 				)}
 
@@ -120,10 +123,10 @@ export function TTSConfigPanel({
 					<>
 						{/* Speaker 0 Voice */}
 						<div className="space-y-2">
-							<Label htmlFor="speaker-0-voice">Speaker 1 Voice (Host)</Label>
+							<Label htmlFor="speaker-0-voice">{t("speaker1_voice")}</Label>
 							<Select value={speaker0Voice} onValueChange={onSpeaker0VoiceChange}>
 								<SelectTrigger id="speaker-0-voice">
-									<SelectValue placeholder="Select voice for speaker 1" />
+									<SelectValue placeholder={t("speaker1_placeholder")} />
 								</SelectTrigger>
 								<SelectContent>
 									{voices.map((voice) => (
@@ -140,10 +143,10 @@ export function TTSConfigPanel({
 
 						{/* Speaker 1 Voice */}
 						<div className="space-y-2">
-							<Label htmlFor="speaker-1-voice">Speaker 2 Voice (Co-host)</Label>
+							<Label htmlFor="speaker-1-voice">{t("speaker2_voice")}</Label>
 							<Select value={speaker1Voice} onValueChange={onSpeaker1VoiceChange}>
 								<SelectTrigger id="speaker-1-voice">
-									<SelectValue placeholder="Select voice for speaker 2" />
+									<SelectValue placeholder={t("speaker2_placeholder")} />
 								</SelectTrigger>
 								<SelectContent>
 									{voices.map((voice) => (

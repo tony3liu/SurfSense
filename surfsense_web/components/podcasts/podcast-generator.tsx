@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Loader2, Mic } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { ContentInputPanel } from "./content-input-panel";
@@ -20,8 +21,11 @@ interface PodcastGeneratorProps {
 }
 
 export function PodcastGenerator({ searchSpaceId, onPodcastGenerated }: PodcastGeneratorProps) {
+	const t = useTranslations("nav_menu.podcast");
+	const tCommon = useTranslations("common");
+
 	// Form state
-	const [podcastTitle, setPodcastTitle] = useState("SurfSense Podcast");
+	const [podcastTitle, setPodcastTitle] = useState(t("defaultTitle"));
 	const [userPrompt, setUserPrompt] = useState("");
 	const [sourceType, setSourceType] = useState<"text" | "document">("text");
 	const [textContent, setTextContent] = useState("");
@@ -49,14 +53,14 @@ export function PodcastGenerator({ searchSpaceId, onPodcastGenerated }: PodcastG
 					setIsGenerating(false);
 					setTaskId(null);
 					setGeneratedPodcastId(status.podcast_id);
-					toast.success("Podcast generated successfully!");
+					toast.success(t("ready"));
 					onPodcastGenerated?.(status.podcast_id);
 				} else if (status.status === "error") {
 					clearInterval(pollInterval);
 					setIsGenerating(false);
 					setTaskId(null);
 					setError(status.error);
-					toast.error(`Generation failed: ${status.error}`);
+					toast.error(`${t("failed")}: ${status.error}`);
 				}
 			} catch (err) {
 				console.error("Error polling task status:", err);
@@ -64,27 +68,27 @@ export function PodcastGenerator({ searchSpaceId, onPodcastGenerated }: PodcastG
 		}, 5000); // Poll every 5 seconds
 
 		return () => clearInterval(pollInterval);
-	}, [taskId, onPodcastGenerated]);
+	}, [taskId, onPodcastGenerated, t]);
 
 	const handleGenerate = async () => {
 		// Validation
 		if (sourceType === "text" && !textContent.trim()) {
-			toast.error("Please enter some text content");
+			toast.error(tCommon("required"));
 			return;
 		}
 
 		if (sourceType === "document" && !documentFile) {
-			toast.error("Please upload a document");
+			toast.error(t("upload_document"));
 			return;
 		}
 
 		if (!ttsProvider) {
-			toast.error("Please select a TTS provider");
+			toast.error(t("select_tts_provider"));
 			return;
 		}
 
 		if (!speaker0Voice || !speaker1Voice) {
-			toast.error("Please select voices for both speakers");
+			toast.error(t("select_voices"));
 			return;
 		}
 
@@ -106,12 +110,12 @@ export function PodcastGenerator({ searchSpaceId, onPodcastGenerated }: PodcastG
 			});
 
 			setTaskId(response.task_id);
-			toast.info("Podcast generation started. This may take a few minutes...");
+			toast.info(t("generating"));
 		} catch (err: any) {
 			console.error("Error generating podcast:", err);
 			setIsGenerating(false);
-			setError(err.message || "Failed to start podcast generation");
-			toast.error(err.message || "Failed to start podcast generation");
+			setError(err.message || t("failed"));
+			toast.error(err.message || t("failed"));
 		}
 	};
 
@@ -120,27 +124,27 @@ export function PodcastGenerator({ searchSpaceId, onPodcastGenerated }: PodcastG
 			{/* Basic Settings */}
 			<Card>
 				<CardHeader>
-					<CardTitle>Podcast Details</CardTitle>
-					<CardDescription>Configure your podcast title and style</CardDescription>
+					<CardTitle>{t("details")}</CardTitle>
+					<CardDescription>{t("details_desc")}</CardDescription>
 				</CardHeader>
 				<CardContent className="space-y-4">
 					<div className="space-y-2">
-						<Label htmlFor="podcast-title">Podcast Title</Label>
+						<Label htmlFor="podcast-title">{t("title_label")}</Label>
 						<Input
 							id="podcast-title"
 							value={podcastTitle}
 							onChange={(e) => setPodcastTitle(e.target.value)}
-							placeholder="Enter podcast title"
+							placeholder={t("title_placeholder")}
 						/>
 					</div>
 
 					<div className="space-y-2">
-						<Label htmlFor="user-prompt">Style Instructions (Optional)</Label>
+						<Label htmlFor="user-prompt">{t("style_instructions")}</Label>
 						<Textarea
 							id="user-prompt"
 							value={userPrompt}
 							onChange={(e) => setUserPrompt(e.target.value)}
-							placeholder="E.g., 'Make it casual and fun', 'Use a professional tone', etc."
+							placeholder={t("style_placeholder")}
 							rows={3}
 							className="resize-none"
 						/>
@@ -174,12 +178,12 @@ export function PodcastGenerator({ searchSpaceId, onPodcastGenerated }: PodcastG
 					{isGenerating ? (
 						<>
 							<Loader2 className="mr-2 h-4 w-4 animate-spin" />
-							Generating Podcast...
+							{t("generating")}
 						</>
 					) : (
 						<>
 							<Mic className="mr-2 h-4 w-4" />
-							Generate Podcast
+							{t("generate_podcast")}
 						</>
 					)}
 				</Button>
@@ -198,13 +202,13 @@ export function PodcastGenerator({ searchSpaceId, onPodcastGenerated }: PodcastG
 			{generatedPodcastId && (
 				<Card>
 					<CardHeader>
-						<CardTitle>Your Podcast is Ready!</CardTitle>
+						<CardTitle>{t("ready")}</CardTitle>
 					</CardHeader>
 					<CardContent>
 						<PodcastPlayer
 							podcastId={generatedPodcastId}
 							title={podcastTitle}
-							description="Your generated podcast is ready to listen"
+							description={t("ready_desc")}
 						/>
 					</CardContent>
 				</Card>

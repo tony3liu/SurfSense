@@ -5,6 +5,7 @@ import type { Podcast } from "@/contracts/types/podcast.types";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Trash2, Download, Play, Clock, Calendar, Mic2 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { PodcastPlayer } from "../tool-ui/generate-podcast";
@@ -25,6 +26,9 @@ interface PodcastHistoryProps {
 }
 
 export function PodcastHistory({ searchSpaceId, refreshTrigger }: PodcastHistoryProps) {
+	const t = useTranslations("nav_menu.podcast");
+	const tCommon = useTranslations("common");
+
 	const [podcasts, setPodcasts] = useState<Podcast[]>([]);
 	const [loading, setLoading] = useState(true);
 	const [selectedPodcastId, setSelectedPodcastId] = useState<number | null>(null);
@@ -43,7 +47,7 @@ export function PodcastHistory({ searchSpaceId, refreshTrigger }: PodcastHistory
 			setPodcasts(response);
 		} catch (err) {
 			console.error("Failed to load podcasts:", err);
-			toast.error("Failed to load podcast history");
+			toast.error(t("load_history_failed"));
 		} finally {
 			setLoading(false);
 		}
@@ -58,14 +62,14 @@ export function PodcastHistory({ searchSpaceId, refreshTrigger }: PodcastHistory
 	const handleDelete = async (id: number) => {
 		try {
 			await podcastsApiService.deletePodcast({ id });
-			toast.success("Podcast deleted successfully");
+			toast.success(t("deleted_success"));
 			setPodcasts((prev) => prev.filter((p) => p.id !== id));
 			if (selectedPodcastId === id) {
 				setSelectedPodcastId(null);
 			}
 		} catch (err) {
 			console.error("Failed to delete podcast:", err);
-			toast.error("Failed to delete podcast");
+			toast.error(t("delete_failed"));
 		} finally {
 			setPodcastToDelete(null);
 		}
@@ -74,7 +78,7 @@ export function PodcastHistory({ searchSpaceId, refreshTrigger }: PodcastHistory
 	// Download podcast
 	const handleDownload = (podcast: Podcast) => {
 		if (!podcast.file_location) {
-			toast.error("Audio file not available");
+			toast.error(t("audio_unavailable"));
 			return;
 		}
 
@@ -85,7 +89,7 @@ export function PodcastHistory({ searchSpaceId, refreshTrigger }: PodcastHistory
 		document.body.appendChild(link);
 		link.click();
 		document.body.removeChild(link);
-		toast.success("Download started");
+		toast.success(t("download_started"));
 	};
 
 	// Format duration
@@ -99,7 +103,7 @@ export function PodcastHistory({ searchSpaceId, refreshTrigger }: PodcastHistory
 	// Format date
 	const formatDate = (dateString: string) => {
 		const date = new Date(dateString);
-		return date.toLocaleDateString("en-US", {
+		return date.toLocaleDateString("zh-CN", {
 			year: "numeric",
 			month: "short",
 			day: "numeric",
@@ -108,11 +112,11 @@ export function PodcastHistory({ searchSpaceId, refreshTrigger }: PodcastHistory
 
 	// Get TTS provider label
 	const getTTSProviderLabel = (provider: string | null) => {
-		if (!provider) return "Default";
-		if (provider.includes("openai")) return "OpenAI";
-		if (provider.includes("vertex")) return "Vertex AI";
-		if (provider.includes("kokoro")) return "Kokoro";
-		if (provider.includes("azure")) return "Azure";
+		if (!provider) return t("default");
+		if (provider.includes("openai")) return t("openai_tts");
+		if (provider.includes("vertex")) return t("vertex_ai");
+		if (provider.includes("kokoro")) return t("kokoro_local");
+		if (provider.includes("azure")) return t("azure_tts");
 		return provider;
 	};
 
@@ -120,11 +124,11 @@ export function PodcastHistory({ searchSpaceId, refreshTrigger }: PodcastHistory
 		return (
 			<Card>
 				<CardHeader>
-					<CardTitle>Podcast History</CardTitle>
+					<CardTitle>{t("history")}</CardTitle>
 				</CardHeader>
 				<CardContent>
 					<div className="flex items-center justify-center py-8">
-						<div className="text-sm text-muted-foreground">Loading...</div>
+						<div className="text-sm text-muted-foreground">{t("loading")}</div>
 					</div>
 				</CardContent>
 			</Card>
@@ -135,15 +139,15 @@ export function PodcastHistory({ searchSpaceId, refreshTrigger }: PodcastHistory
 		return (
 			<Card>
 				<CardHeader>
-					<CardTitle>Podcast History</CardTitle>
-					<CardDescription>Your generated podcasts will appear here</CardDescription>
+					<CardTitle>{t("history")}</CardTitle>
+					<CardDescription>{t("history_desc")}</CardDescription>
 				</CardHeader>
 				<CardContent>
 					<div className="flex flex-col items-center justify-center py-8 text-center">
 						<Mic2 className="h-12 w-12 text-muted-foreground mb-4" />
-						<p className="text-sm text-muted-foreground">No podcasts yet</p>
+						<p className="text-sm text-muted-foreground">{t("no_podcasts")}</p>
 						<p className="text-xs text-muted-foreground mt-1">
-							Generate your first podcast to see it here
+							{t("generate_first")}
 						</p>
 					</div>
 				</CardContent>
@@ -155,8 +159,8 @@ export function PodcastHistory({ searchSpaceId, refreshTrigger }: PodcastHistory
 		<>
 			<Card>
 				<CardHeader>
-					<CardTitle>Podcast History</CardTitle>
-					<CardDescription>{podcasts.length} podcast(s) generated</CardDescription>
+					<CardTitle>{t("history")}</CardTitle>
+					<CardDescription>{t("podcasts_count", { count: podcasts.length })}</CardDescription>
 				</CardHeader>
 				<CardContent className="space-y-4">
 					{podcasts.map((podcast) => (
@@ -216,7 +220,7 @@ export function PodcastHistory({ searchSpaceId, refreshTrigger }: PodcastHistory
 									<PodcastPlayer
 									podcastId={podcast.id}
 									title={podcast.title}
-									description={`Created ${formatDate(podcast.created_at)}`}
+									description={`${t("created")} ${formatDate(podcast.created_at)}`}
 								/>
 								</CardContent>
 							)}
@@ -229,18 +233,18 @@ export function PodcastHistory({ searchSpaceId, refreshTrigger }: PodcastHistory
 			<AlertDialog open={podcastToDelete !== null} onOpenChange={() => setPodcastToDelete(null)}>
 				<AlertDialogContent>
 					<AlertDialogHeader>
-						<AlertDialogTitle>Delete Podcast</AlertDialogTitle>
+						<AlertDialogTitle>{t("delete_podcast")}</AlertDialogTitle>
 						<AlertDialogDescription>
-							Are you sure you want to delete this podcast? This action cannot be undone.
+							{t("delete_confirm")}
 						</AlertDialogDescription>
 					</AlertDialogHeader>
 					<AlertDialogFooter>
-						<AlertDialogCancel>Cancel</AlertDialogCancel>
+						<AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
 						<AlertDialogAction
 							onClick={() => podcastToDelete && handleDelete(podcastToDelete)}
 							className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
 						>
-							Delete
+							{t("delete")}
 						</AlertDialogAction>
 					</AlertDialogFooter>
 				</AlertDialogContent>

@@ -5,9 +5,11 @@ import { PodcastHistory } from "@/components/podcasts/podcast-history";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Mic2 } from "lucide-react";
 import { useParams } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 
 export default function PodcastsPage() {
+	const t = useTranslations("nav_menu.podcast");
 	const params = useParams();
 	const searchSpaceId = Number(params.search_space_id);
 	const [refreshTrigger, setRefreshTrigger] = useState(0);
@@ -27,9 +29,9 @@ export default function PodcastsPage() {
 						<Mic2 className="h-6 w-6 text-primary" />
 					</div>
 					<div>
-						<h1 className="text-3xl font-bold">Podcast Studio</h1>
+						<h1 className="text-3xl font-bold">{t("studio")}</h1>
 						<p className="text-muted-foreground">
-							Generate AI-powered podcasts from your content
+							{t("studio_desc")}
 						</p>
 					</div>
 				</div>
@@ -41,9 +43,9 @@ export default function PodcastsPage() {
 				<div className="lg:col-span-1">
 					<Card className="h-fit sticky top-6">
 						<CardHeader>
-							<CardTitle>Generate Podcast</CardTitle>
+							<CardTitle>{t("generate_podcast")}</CardTitle>
 							<CardDescription>
-								Create a two-speaker podcast from text or documents
+								{t("create_podcast_desc")}
 							</CardDescription>
 						</CardHeader>
 						<CardContent>
